@@ -1,0 +1,28 @@
+{
+  "name": "civic-reporting-app",
+  "version": "1.0.0",
+  "description": "App for citizen to report civic issues to government",
+  "homepage": "https://github.com/AMOB-Kahuna/Civic-Reporting-App#readme",
+  "bugs": {
+    "url": "https://github.com/AMOB-Kahuna/Civic-Reporting-App/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AMOB-Kahuna/Civic-Reporting-App.git"
+  },
+  "license": "ISC",
+  "author": "AMOB",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
