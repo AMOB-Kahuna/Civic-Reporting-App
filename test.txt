@@ -1,0 +1,12 @@
+API POST REQUEST FOR REPORTS
+{
+	"category": "infrastructure",
+	"sub_category": "drainage issue",
+	"urgency": "0",
+	"description": "This is a sample description",
+	"lat": "",
+	"lng": "",
+	"address": "No. 1, test street, Nigeria.",
+	"verification_status": "unverified",
+	"resolution_status": "new"
+}
