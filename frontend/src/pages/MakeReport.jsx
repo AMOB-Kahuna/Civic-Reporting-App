@@ -1,32 +1,11 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom';
+import { categories, subCategories } from '../category';
 
 const MakeReport = () => {
 
   const [selectedCategory, setSelectedCategory] = useState("Infrastructure");
 
-  const categories = [
-    "Infrastructure",
-    "Public Safety",
-    "Cleanliness",
-  ];
-
-  const subCategories = {
-    "Infrastructure": [
-      "Pothole/Road Damage",
-      "Bad Road",
-      "Broken Streetlight",
-    ],
-    "Public Safety": [
-      "Suspicious Activity",
-      "Reckless Driver",
-      "Overflowing River"
-    ],
-    "Cleanliness": [
-      "Illegal Dumping",
-      "Bad Odour"
-    ]
-  }
 
   // console.log(subCategory[category[2]])
 
@@ -55,7 +34,11 @@ const MakeReport = () => {
                 }}
               >
                 {
-                  categories.map(category => <option key={category} value={category}>{category}</option>)
+                  categories.map(category => <option
+                    key={category}
+                    value={category}
+                    className='text-[#2d3047]'
+                  >{category}</option>)
                 }
               </select>
             </div>
@@ -71,7 +54,11 @@ const MakeReport = () => {
                 className='w-47 border-2 px-5 py-2 rounded-2xl focus:border-[#acaf1d]'
               >
                 {
-                  subCategories[selectedCategory].map(subCategory => <option key={subCategory} value={subCategory}>{subCategory}</option>)
+                  subCategories[selectedCategory].map(subCategory => <option
+                    key={subCategory}
+                    value={subCategory}
+                    className='text-[#2d3047]'
+                  >{subCategory}</option>)
                 }
               </select>
             </div>

@@ -7,7 +7,7 @@ const Layout = () => {
   return (
     <div className='min-h-screen flex flex-col justify-between'>
       <Header />
-      <main className='px-5 py-5 text-xl'>
+      <main className='min-h-full px-5 py-5 text-xl grow'>
         <Outlet />
       </main>
       <Footer />
