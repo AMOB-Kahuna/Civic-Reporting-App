@@ -17,6 +17,10 @@ export const subCategories = {
   ],
   "Cleanliness": [
     "Illegal Dumping",
-    "Bad Odour"
+    "Bad Odour",
+    "Drainage Issue"
   ]
 }
+
+export const subCategoryList = Object.values(subCategories).flat();
+// console.log(subCategoryList)
