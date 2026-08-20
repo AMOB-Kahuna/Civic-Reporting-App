@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { subCategoryList } from '../category';
+import {Loader2} from 'lucide-react'
 
 const Home = () => {
 
@@ -13,7 +14,7 @@ const Home = () => {
   });
   const sortedIssueRank = issueRank.sort( (a, b) => b[1] - a[1]);
 
-  console.log(sortedIssueRank)
+  // console.log(sortedIssueRank)
   // const topLocations = reports && reports.map(report => report.area)
 
   // console.log(issueRank)
@@ -45,7 +46,14 @@ const Home = () => {
     <>
       <h2 className='text-2xl font-medium text-center'>Yearly Report Analytics</h2>
 
-      <section className='flex flex-col gap-10 items-center my-10'>
+      {
+        reports.length === 0 ?
+        <div className='w-full h-full flex flex-col items-center justify-center py-30 text-[#266907]'>
+          <Loader2 className="w-12 h-12 animate-spin " />
+          <p className='text-lg font-light text-[#2d3047]/70'>Fetching Data...</p>
+        </div>
+        :
+        <section className='flex flex-col gap-10 items-center my-10'>
         <div className='w-[60%] px-10 py-5 shadow-sm shadow-black/30 border border-[#2d3047]/20 rounded-2xl flex  flex-col gap-8'>
           <p className='font-medium text-gray-500'>Total Reports</p>
           <p className='text-4xl font-medium text-blue-500'>{reports.length}</p>
@@ -79,7 +87,7 @@ const Home = () => {
         {/* <div className='w-full px-10 py-5 shadow-sm shadow-black/30 border border-[#2d3047]/20 rounded-2xl'>
           <p className='font-bold text-xl'>Top Locations</p>
         </div> */}
-      </section>
+      </section>}
     </>
   )
 }
