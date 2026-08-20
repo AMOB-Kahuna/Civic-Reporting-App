@@ -1,19 +1,25 @@
-import React from 'react'
+import React from 'react';
 
 const Terms = () => {
   return (
-    <>
-      <h2 className='text-2xl font-medium text-center mb-5'>Terms of Service</h2>
-      
-      <p className='text-justify'>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Necessitatibus optio maxime tempore veritatis itaque provident reiciendis ipsam, in laudantium voluptatum blanditiis et est totam, fugiat quae magni perferendis. Iure, consectetur.
-        Quod debitis facere sit incidunt a inventore ut reiciendis laboriosam quia quo nulla ex cum dolorum quisquam illum, aspernatur dolor rerum at commodi quidem? Deleniti quis ut vel earum error.
-        Reprehenderit ipsum ab quidem illum odit beatae soluta corporis libero, fugit rem neque, velit rerum doloribus sequi. Veritatis harum, quas natus qui itaque, delectus minima, dolorum adipisci quia quidem quo.
-        Dolorum impedit ut amet eaque quidem voluptatem, sapiente dolor sequi dolore deserunt nostrum fugit, error ipsam alias obcaecati quae facilis necessitatibus! Voluptatem explicabo placeat eaque quaerat nam dicta enim facilis.
-        Neque tempore excepturi, est optio suscipit similique dignissimos reprehenderit iusto necessitatibus alias, dicta sint nesciunt harum pariatur ipsam labore ducimus provident quibusdam magni consectetur adipisci recusandae! Commodi omnis nostrum repellat.
-      </p>
-    </>
-  )
-}
+    <div className="max-w-3xl lg:max-w-4xl mx-auto my-6 p-6 md:p-8 bg-white border border-[#2d3047]/15 rounded-3xl shadow-sm">
+      <h2 className="text-2xl md:text-3xl font-bold text-center text-[#2d3047] mb-6 border-b border-gray-100 pb-4">
+        Terms of Service
+      </h2>
 
-export default Terms
+      <div className="space-y-4 text-justify text-base md:text-lg text-gray-700 leading-relaxed">
+        <p>
+          Welcome to NaijaReport. By using our civic reporting platform, you agree to submit truthful, accurate, and relevant information regarding civic and community issues.
+        </p>
+        <p>
+          Users are prohibited from uploading offensive content, false allegations, or unauthorized private information. Reports submitted through this portal are made available to local authorities and relevant administrative bodies for verification and resolution.
+        </p>
+        <p>
+          We reserve the right to review, modify, or remove any report that violates our community standards or contains misleading data. Thank you for contributing to safer and better-maintained communities across Nigeria.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Terms;

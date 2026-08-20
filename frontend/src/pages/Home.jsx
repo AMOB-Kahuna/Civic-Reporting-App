@@ -1,95 +1,140 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { subCategoryList } from '../category';
-import {Loader2} from 'lucide-react'
+import { Loader2, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const Home = () => {
-
   const [reports, setReports] = useState([]);
   const [openIssues, setOpenIssues] = useState(0);
   const [closedIssues, setClosedIssues] = useState(0);
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const issueRank = reports && subCategoryList.map(subCategory => {
-    return [subCategory, reports.filter(report => report.sub_category === subCategory.toLowerCase()).length]
+
+  // Compute issue type breakdown accurately
+  const issueCounts = {};
+
+  // Initialize known sub-categories with 0
+  subCategoryList.forEach((subCat) => {
+    issueCounts[subCat] = 0;
   });
-  const sortedIssueRank = issueRank.sort( (a, b) => b[1] - a[1]);
 
-  // console.log(sortedIssueRank)
-  // const topLocations = reports && reports.map(report => report.area)
+  // Aggregate actual counts from reports
+  reports.forEach((report) => {
+    if (!report.sub_category) return;
 
-  // console.log(issueRank)
+    // Match case-insensitively against predefined sub-category list
+    const matchedSubCategory = subCategoryList.find(
+      (sc) => sc.toLowerCase() === report.sub_category.trim().toLowerCase()
+    );
+
+    if (matchedSubCategory) {
+      issueCounts[matchedSubCategory] = (issueCounts[matchedSubCategory] || 0) + 1;
+    } else {
+      const label = report.sub_category.trim();
+      issueCounts[label] = (issueCounts[label] || 0) + 1;
+    }
+  });
+
+  // Convert map to sorted array (highest count first)
+  const sortedIssueRank = Object.entries(issueCounts).sort((a, b) => b[1] - a[1]);
 
   // Fetch reports data
-  useEffect( () => {
+  useEffect(() => {
     (async () => {
       try {
         const res = await fetch(`${baseUrl}/reports`);
         const data = await res.json();
-
-        console.log(data);
-        setReports(data)
+        setReports(data || []);
       } catch (err) {
-        console.log(err);
+        console.error('Failed to fetch home reports:', err);
       }
     })();
-  }, [])
+  }, []);
 
-  // Calculate Open and closed issues
-  useEffect( () => {
-    if (reports.length > 0) {
-      setOpenIssues(reports.filter(report => report.resolution_status === 'open').length);
-      setClosedIssues(reports.filter(report => report.resolution_status === 'closed').length);
+  // Calculate Open and Closed issues
+  useEffect(() => {
+    if (reports && reports.length > 0) {
+      const openCount = reports.filter((report) => {
+        const status = (report.resolution_status || 'new').toLowerCase();
+        return status === 'open' || status === 'new' || status === 'in_progress' || status === 'in progress';
+      }).length;
+
+      const closedCount = reports.filter((report) => {
+        const status = (report.resolution_status || '').toLowerCase();
+        return status === 'closed' || status === 'resolved';
+      }).length;
+
+      setOpenIssues(openCount);
+      setClosedIssues(closedCount);
     }
   }, [reports]);
 
   return (
-    <>
-      <h2 className='text-2xl font-medium text-center'>Yearly Report Analytics</h2>
+    <div className="max-w-5xl mx-auto py-2">
+      <h2 className="text-2xl md:text-3xl font-bold text-[#2d3047] text-center mb-6">Yearly Report Analytics</h2>
 
-      {
-        reports.length === 0 ?
-        <div className='w-full h-full flex flex-col items-center justify-center py-30 text-[#266907]'>
+      {reports.length === 0 ? (
+        <div className="w-full py-24 flex flex-col items-center justify-center text-[#266907]">
           <Loader2 className="w-12 h-12 animate-spin " />
-          <p className='text-lg font-light text-[#2d3047]/70'>Fetching Data...</p>
+          <p className="text-lg font-light text-[#2d3047]/70 mt-3">Fetching Data...</p>
         </div>
-        :
-        <section className='flex flex-col gap-10 items-center my-10'>
-        <div className='w-[60%] px-10 py-5 shadow-sm shadow-black/30 border border-[#2d3047]/20 rounded-2xl flex  flex-col gap-8'>
-          <p className='font-medium text-gray-500'>Total Reports</p>
-          <p className='text-4xl font-medium text-blue-500'>{reports.length}</p>
-        </div>
-
-        <div className='w-[60%] px-10 py-5 shadow-sm shadow-black/30 border border-[#2d3047]/20 rounded-2xl flex flex-col gap-8'>
-          <p className='font-medium text-gray-500'>Open Issues</p>
-          <p className='text-4xl font-medium text-orange-500'>{openIssues}</p>
-        </div>
-
-        <div className='w-[60%] px-10 py-5 shadow-sm shadow-black/30 border border-[#2d3047]/20 rounded-2xl flex flex-col gap-8'>
-          <p className='font-medium text-gray-500'>Closed Issues</p>
-          <p className='text-4xl font-medium text-green-500'>{closedIssues}</p>
-        </div>
-
-        <div className='w-full px-5 py-5 shadow-sm shadow-black/30 border border-[#2d3047]/20 rounded-2xl'>
-          <p className='font-bold text-xl mb-5'>Issue Types</p>
-          {
-            sortedIssueRank.map(issue => 
-              <div
-                key={issue}
-                className='border-b border-b-[#2d3047]/20 mb-5 flex justify-between'
-              >
-                <p className='text-xl font-light'>{issue[0]}</p>
-                <p className='text-2xl text-right font-medium'>{issue[1]}</p>
+      ) : (
+        <section className="flex flex-col gap-8 my-6">
+          {/* Responsive Stat Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="px-6 py-6 bg-white shadow-sm shadow-black/10 border border-[#2d3047]/20 rounded-2xl flex flex-col justify-between gap-4 transition-transform hover:-translate-y-1">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-gray-500 text-sm md:text-base">Total Reports</p>
+                <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+                  <FileText className="w-5 h-5" />
+                </div>
               </div>
-            )
-          }
-        </div>
+              <p className="text-4xl md:text-5xl font-bold text-blue-600">{reports.length}</p>
+            </div>
 
-        {/* <div className='w-full px-10 py-5 shadow-sm shadow-black/30 border border-[#2d3047]/20 rounded-2xl'>
-          <p className='font-bold text-xl'>Top Locations</p>
-        </div> */}
-      </section>}
-    </>
-  )
-}
+            <div className="px-6 py-6 bg-white shadow-sm shadow-black/10 border border-[#2d3047]/20 rounded-2xl flex flex-col justify-between gap-4 transition-transform hover:-translate-y-1">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-gray-500 text-sm md:text-base">Open Issues</p>
+                <div className="p-2.5 rounded-xl bg-orange-50 text-orange-500">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-4xl md:text-5xl font-bold text-orange-500">{openIssues}</p>
+            </div>
 
-export default Home
+            <div className="px-6 py-6 bg-white shadow-sm shadow-black/10 border border-[#2d3047]/20 rounded-2xl flex flex-col justify-between gap-4 transition-transform hover:-translate-y-1">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-gray-500 text-sm md:text-base">Closed Issues</p>
+                <div className="p-2.5 rounded-xl bg-green-50 text-green-600">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-4xl md:text-5xl font-bold text-green-600">{closedIssues}</p>
+            </div>
+          </div>
+
+          {/* Issue Types Breakdown */}
+          <div className="w-full px-6 py-6 bg-white shadow-sm shadow-black/10 border border-[#2d3047]/20 rounded-2xl">
+            <p className="font-bold text-xl md:text-2xl text-[#2d3047] mb-6 border-b border-gray-100 pb-3">
+              Issue Types Breakdown
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4">
+              {sortedIssueRank.map(([typeLabel, count]) => (
+                <div
+                  key={typeLabel}
+                  className="border-b border-[#2d3047]/10 pb-3 flex justify-between items-center"
+                >
+                  <p className="text-base md:text-lg font-medium text-[#2d3047]">{typeLabel}</p>
+                  <span className="text-lg font-bold px-3 py-1 bg-[#266907]/10 text-[#266907] rounded-xl">
+                    {count}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+};
+
+export default Home;

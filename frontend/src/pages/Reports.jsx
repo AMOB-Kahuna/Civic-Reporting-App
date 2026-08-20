@@ -1,108 +1,145 @@
-import React, { useEffect, useState } from 'react'
-import ReportCard from '../components/ReportCard'
-import { Loader2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import ReportCard from '../components/ReportCard';
+import { Loader2, Search, Filter, RefreshCw } from 'lucide-react';
 import Message from '../components/Message';
 
 const Reports = () => {
 
   const [loading, setLoading] = useState(false);
   const [reports, setReports] = useState([]);
-  const [filter, setFilter] = useState(null);
-  const [keyword, setKeyword] = useState(null);
+  const [filter, setFilter] = useState('');
+  const [keyword, setKeyword] = useState('');
   const [showMessage, setShowMessage] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [responseError, setResponseError] = useState('');
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  useEffect( () => {
+  const fetchAllReports = async () => {
     setLoading(true);
-    (async () => {
-      try {
-        const res = await fetch(`${baseUrl}/reports`);
-        const data = await res.json();
+    setResponseError('');
+    try {
+      const res = await fetch(`${baseUrl}/reports`);
+      const data = await res.json();
+      setReports(data || []);
+    } catch (err) {
+      console.error(err);
+      setResponseError('Failed to load reports');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // console.log(data);
-        setReports(data);
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-      }
-    })();
-  }, [])
+  useEffect(() => {
+    fetchAllReports();
+  }, []);
 
   useEffect(() => {
     if (!showMessage) return;
 
     const timeOut = setTimeout(() => {
-      setShowMessage(false)
+      setShowMessage(false);
     }, 2000);
 
-    return () => clearTimeout(timeOut)
-  }, [showMessage])
+    return () => clearTimeout(timeOut);
+  }, [showMessage]);
 
-  async function handleSearch() {
-    if (!keyword && !filter) {
-      setSearchError("Provide a keyword or filter")
-      setShowMessage(true);
-      return
+  async function handleSearch(e) {
+    if (e) e.preventDefault();
+    setResponseError('');
+
+    if (!keyword.trim() && (!filter || filter === 'all')) {
+      fetchAllReports();
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`${baseUrl}/reports/search?keyword=${keyword}&filter=${filter}`);
+      const queryParams = new URLSearchParams();
+      if (keyword.trim()) queryParams.append('keyword', keyword.trim());
+      if (filter && filter !== 'all') queryParams.append('filter', filter);
+
+      const res = await fetch(`${baseUrl}/reports/search?${queryParams.toString()}`);
       const data = await res.json();
 
-      if (data.length === 0) {
-        setResponseError(`No result for "${keyword}"`)
+      if (!res.ok || !Array.isArray(data) || data.length === 0) {
+        setReports([]);
+        setResponseError(`No reports found for matching criteria.`);
+      } else {
+        setReports(data);
       }
-
-      console.log(data);
-      setReports(data);
-      setLoading(false);
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      setResponseError('Error searching reports');
+    } finally {
+      setLoading(false);
     }
   }
 
+  const handleReset = () => {
+    setKeyword('');
+    setFilter('');
+    fetchAllReports();
+  };
+
   return (
-    <>
-      <h2 className='text-2xl font-medium text-center'>Browse Reports</h2>
+    <div className="max-w-5xl mx-auto py-2">
+      <h2 className="text-2xl md:text-3xl font-bold text-center text-[#2d3047]">Browse Reports</h2>
       
-      <section className='border border-[#266907] rounded-2xl py-5 px-5 my-5 text-center'>
-        {/* <p>Search</p> */}
-        <div className='flex flex-col gap-5 items-center'>
+      {/* Search & Filter Section - Matches Admin Page Design */}
+      <form
+        onSubmit={handleSearch}
+        className="bg-[#e8f1fa] p-4 rounded-2xl my-6 flex flex-col md:flex-row gap-4 justify-between items-center border border-[#2d3047]/10 shadow-sm"
+      >
+        <div className="relative w-full md:w-96">
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
-            className='w-[98%] shadow-md px-5 py-2.5 rounded-2xl border border-[#2d3047]/30'
-            placeholder='Enter location...'
-            onChange={ (e) => setKeyword(e.target.value)}
-           />
+            placeholder="Search location or keyword..."
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl bg-white focus:outline-none focus:border-[#266907] text-base"
+          />
+        </div>
 
-          <div className='w-[70%] flex justify-between mx-auto'>
-            <label htmlFor='filter'>Filter:</label>
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-gray-600" />
+            <span className="text-sm font-semibold text-[#2d3047]">Filter:</span>
             <select
               name="filter"
               id="filter"
-              className='ring-1 ring-[#2d3047]/30 rounded-xl w-[70%] px-4 py-1'
+              value={filter}
               onChange={(e) => setFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-xl bg-white text-base focus:outline-none focus:border-[#266907]"
             >
-              <option value=""></option>
+              <option value="">All Statuses</option>
               <option value="open">Open</option>
               <option value="new">New</option>
-              <option value="closed">Closed</option>
+              <option value="in_progress">In Progress</option>
+              <option value="closed">Closed / Resolved</option>
             </select>
           </div>
 
           <button
-            className='bg-[#266907] px-8 py-4 rounded-2xl font-medium text-[#e8f1fa] cursor-pointer'
-            onClick={handleSearch}
-          >Search</button>
+            type="submit"
+            className="px-5 py-2 bg-[#266907] text-white font-bold rounded-xl hover:bg-[#acaf1d] transition-colors cursor-pointer text-sm"
+          >
+            Search
+          </button>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="p-2.5 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors cursor-pointer"
+            title="Reset search & filters"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
-        {
-          showMessage && <Message text={searchError} type="error" />
-        }
-      </section>
+
+        {showMessage && <Message text={searchError} type="error" />}
+      </form>
 
       {
         loading ?
@@ -117,27 +154,22 @@ const Reports = () => {
         <section className='py-5 grid gap-5'>
           {
             reports &&
-            reports.map( ({
-              address,
-              category,
-              sub_category,
-              resolution_status,
-              description,
-              id
-            }, index) => <ReportCard
-              key={index}
-              category={category}
-              subcategory={sub_category}
-              address={address}
-              description={description}
-              resolutionStatus={resolution_status}
-              id={id}
+            reports.map( (report) => <ReportCard
+              key={report.id}
+              category={report.category}
+              subcategory={report.sub_category}
+              address={report.address}
+              description={report.description}
+              resolutionStatus={report.resolution_status}
+              id={report.id}
+              img={report.img}
+              createdAt={report.created_at}
             /> )
           }
         </section>
       }
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default Reports
+export default Reports;

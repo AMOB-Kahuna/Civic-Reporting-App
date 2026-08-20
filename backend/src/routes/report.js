@@ -1,5 +1,6 @@
 import express from 'express';
 import { supabase } from '../config/supabase.js';
+import { createClient } from '@supabase/supabase-js';
 import multer from 'multer';
 
 const router = express.Router();
@@ -172,5 +173,87 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  const authHeader = req.headers.authorization;
+
+  try {
+    let client = supabase;
+    if (authHeader) {
+      const supabaseUrl = process.env.SUPABASE_URL || '';
+      const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY || '';
+      client = createClient(supabaseUrl, supabaseKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+    }
+
+    // Fetch report data to get image details
+    const { data: reportData } = await client
+      .from('reports')
+      .select()
+      .eq('id', id)
+      .single();
+
+    // Delete files in storage bucket under reports/${id}
+    try {
+      const { data: files } = await client.storage
+        .from('images')
+        .list(`reports/${id}`);
+
+      if (files && files.length > 0) {
+        const pathsToDelete = files.map(f => `reports/${id}/${f.name}`);
+        await client.storage.from('images').remove(pathsToDelete);
+      }
+
+      if (reportData && reportData.img) {
+        const match = reportData.img.match(/\/images\/(.+)$/);
+        if (match && match[1]) {
+          const imgPath = decodeURIComponent(match[1]);
+          await client.storage.from('images').remove([imgPath]);
+        }
+      }
+    } catch (storageErr) {
+      console.warn("Storage deletion error (continuing DB record deletion):", storageErr);
+    }
+
+    // Delete record from database and verify deletion with .select()
+    let { data: deletedRows, error: deleteError } = await client
+      .from('reports')
+      .delete()
+      .eq('id', id)
+      .select();
+
+    if (deleteError) {
+      console.error("Supabase delete error:", deleteError);
+      return res.status(400).json({ error: deleteError.message });
+    }
+
+    // Fallback: try matching numeric ID if column type is integer
+    if ((!deletedRows || deletedRows.length === 0) && !isNaN(Number(id))) {
+      const { data: numDeletedRows, error: numDeleteErr } = await client
+        .from('reports')
+        .delete()
+        .eq('id', Number(id))
+        .select();
+
+      if (numDeleteErr) {
+        return res.status(400).json({ error: numDeleteErr.message });
+      }
+
+      if (numDeletedRows && numDeletedRows.length > 0) {
+        return res.json({ message: "Report and associated images deleted successfully", report: numDeletedRows[0] });
+      }
+    }
+
+    if (!deletedRows || deletedRows.length === 0) {
+      return res.status(404).json({ error: "Report not found or deletion blocked by database RLS policy" });
+    }
+
+    res.json({ message: "Report and associated images deleted successfully", report: deletedRows[0] });
+  } catch (err) {
+    console.error("Delete report error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 export default router;

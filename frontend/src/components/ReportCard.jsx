@@ -1,5 +1,6 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { MapPin, ChevronRight, Image as ImageIcon } from 'lucide-react';
 
 const ReportCard = ({
   address,
@@ -7,36 +8,76 @@ const ReportCard = ({
   subcategory,
   description,
   resolutionStatus,
-  id
+  id,
+  img,
+  createdAt,
 }) => {
-
-  // console.log(id)
-  const statusClass = resolutionStatus === "new" ?
-    "text-blue-700 text-shadow-md text-shadow-blue-300" :
-    resolutionStatus === "open" ?
-    "text-green-700 text-shadow-md text-shadow-green-300" :
-    "text-black-700 text-shadow-md text-shadow-black-300"
+  const currentStatus = (resolutionStatus || 'new').toLowerCase();
 
   return (
     <Link
-      className='shadow-md px-5 py-2.5 rounded-2xl border border-[#2d3047]/30 flex flex-col gap-3 hover:scale-102'
       to={`/report/${id}`}
+      className="bg-white border border-[#2d3047]/15 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-[#266907]/40 transition-all flex flex-col md:flex-row gap-5 justify-between items-start md:items-center group"
     >
-      <h3 className='text-2xl font-medium'>{address}</h3>
-      {/* <img
-        src="./../assets/hero.png"
-        alt=""
-        className='w-full h-40'
-       /> */}
-      
-      <div className='flex flex-col gap-3 font-light'>
-        <p className='bg-gray-200 px-4 py-2 w-fit rounded-2xl ring ring-gray-400'>{category}</p>
-        <p className='bg-orange-200 px-4 py-2 w-fit rounded-2xl ring ring-orange-400'>{subcategory}</p>
-      </div>
-      <p>{description}</p>
-      <p className={statusClass}>{resolutionStatus}</p>
-    </Link>
-  )
-}
+      <div className="flex flex-col md:flex-row gap-4 items-start w-full md:w-3/4">
+        {img ? (
+          <img
+            src={img}
+            alt={subcategory || category || 'Report thumbnail'}
+            className="w-full md:w-28 h-28 object-cover rounded-xl border border-gray-200 flex-shrink-0"
+          />
+        ) : (
+          <div className="w-full md:w-28 h-28 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 flex-shrink-0">
+            <ImageIcon className="w-8 h-8 opacity-40" />
+          </div>
+        )}
 
-export default ReportCard
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#266907]/10 text-[#266907] uppercase tracking-wide">
+              {category || 'General'}
+            </span>
+            {subcategory && (
+              <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 capitalize">
+                {subcategory}
+              </span>
+            )}
+            <span
+              className={`text-xs font-bold px-2.5 py-1 rounded-lg capitalize ${
+                currentStatus === 'closed'
+                  ? 'bg-green-100 text-green-800'
+                  : currentStatus === 'in_progress' || currentStatus === 'in progress'
+                  ? 'bg-purple-100 text-purple-800'
+                  : 'bg-orange-100 text-orange-800'
+              }`}
+            >
+              Status: {currentStatus}
+            </span>
+          </div>
+
+          <h3 className="font-bold text-lg text-[#2d3047] group-hover:text-[#266907] transition-colors">
+            {description}
+          </h3>
+
+          <p className="text-sm text-gray-600 flex items-center gap-1.5">
+            <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <span className="font-semibold text-gray-700">Location:</span> {address}
+          </p>
+
+          {createdAt && (
+            <p className="text-xs text-gray-400">
+              Submitted: {new Date(createdAt).toLocaleString()}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1 text-[#266907] font-semibold text-sm self-end md:self-center pt-2 md:pt-0">
+        <span>View Details</span>
+        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      </div>
+    </Link>
+  );
+};
+
+export default ReportCard;
