@@ -6,8 +6,11 @@
 [![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database_%26_Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![YouTube Demo](https://img.shields.io/badge/YouTube-Watch_Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/LA9JEXvufiU)
 
 A modern, full-stack civic engagement platform designed for citizens to report municipal and public safety issues directly to local government authorities. The application empowers communities to submit incidents with photographic evidence and location metadata while providing city administrators with a real-time management console and analytics dashboard to track and resolve civic reports efficiently.
+
+▶️ **[Watch the YouTube Video Demo](https://youtu.be/LA9JEXvufiU)**
 
 ---
 
